@@ -294,6 +294,41 @@ input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-
   .ls-card{width:130px;padding:24px 14px 20px}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ── FILE UPLOAD ── */
+.upload-area{
+  border:2px dashed var(--line3);
+  border-radius:8px;
+  padding:24px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  background:var(--bg);
+  position:relative;
+}
+.upload-area:hover{border-color:var(--accent);background:var(--bg2)}
+.upload-area.has-file{border-style:solid;border-color:var(--accent);background:rgba(107,79,42,0.06)}
+.upload-area input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+  border:none;padding:0;font-size:0;
+}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-label{font-size:14px;font-weight:500;color:var(--ink2);display:block;margin-bottom:4px}
+.upload-hint{font-size:12px;color:var(--ink3)}
+.upload-preview{
+  display:none;align-items:center;gap:12px;
+  background:var(--surface);border-radius:6px;
+  padding:10px 14px;margin-top:10px;
+}
+.upload-preview.show{display:flex}
+.upload-preview img{width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line2)}
+.upload-preview-name{font-size:13px;color:var(--ink2);flex:1;text-align:left;word-break:break-all}
+.upload-remove{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:18px;padding:0 4px;line-height:1}
+.upload-remove:hover{color:var(--red)}
+.upload-progress{height:3px;background:var(--line2);border-radius:2px;margin-top:8px;overflow:hidden;display:none}
+.upload-progress.show{display:block}
+.upload-progress-bar{height:100%;background:var(--accent);width:0%;transition:width .3s;border-radius:2px}
+body.ar .upload-preview-name{text-align:right}
+
 </style>
 </head>
 <body>
@@ -386,6 +421,41 @@ input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-
             <label id="l-adresse"></label>
             <textarea id="adresse" rows="2"></textarea>
             <span class="err-msg" id="e-adresse"></span>
+          </div>
+        </div>
+        <!-- CIN Photo Upload -->
+        <div class="row">
+          <div class="field">
+            <label id="l-cin-recto"></label>
+            <div class="upload-area" id="ua-cin-recto">
+              <input type="file" id="cin-recto" accept="image/*,application/pdf" onchange="handleFileSelect(this,'cin-recto')">
+              <div class="upload-icon">📄</div>
+              <span class="upload-label" id="ul-cin-recto"></span>
+              <span class="upload-hint" id="uh-cin-recto"></span>
+            </div>
+            <div class="upload-preview" id="up-cin-recto">
+              <img id="uimg-cin-recto" src="" alt="">
+              <span class="upload-preview-name" id="uname-cin-recto"></span>
+              <button class="upload-remove" onclick="removeFile('cin-recto')">×</button>
+            </div>
+            <div class="upload-progress" id="uprog-cin-recto"><div class="upload-progress-bar" id="ubar-cin-recto"></div></div>
+            <span class="err-msg" id="e-cin-recto"></span>
+          </div>
+          <div class="field">
+            <label id="l-cin-verso"></label>
+            <div class="upload-area" id="ua-cin-verso">
+              <input type="file" id="cin-verso" accept="image/*,application/pdf" onchange="handleFileSelect(this,'cin-verso')">
+              <div class="upload-icon">📄</div>
+              <span class="upload-label" id="ul-cin-verso"></span>
+              <span class="upload-hint" id="uh-cin-verso"></span>
+            </div>
+            <div class="upload-preview" id="up-cin-verso">
+              <img id="uimg-cin-verso" src="" alt="">
+              <span class="upload-preview-name" id="uname-cin-verso"></span>
+              <button class="upload-remove" onclick="removeFile('cin-verso')">×</button>
+            </div>
+            <div class="upload-progress" id="uprog-cin-verso"><div class="upload-progress-bar" id="ubar-cin-verso"></div></div>
+            <span class="err-msg" id="e-cin-verso"></span>
           </div>
         </div>
         <div class="btn-row">
@@ -495,6 +565,10 @@ fr:{
   enom:'Veuillez entrer votre nom complet.',ecinShort:'Minimum 5 caractères.',ecinInvalid:'Format invalide.',
   edob:'Veuillez entrer votre date de naissance.',edob18:'Vous devez avoir au moins 18 ans.',
   eadresse:'Veuillez entrer votre adresse.',
+  lCinRecto:'CIN / Passeport — Recto',lCinVerso:'CIN / Passeport — Verso',
+  ulCinRecto:'Cliquez pour ajouter',ulCinVerso:'Cliquez pour ajouter',
+  uhCinRecto:'Recto · JPG, PNG ou PDF · max 10MB',uhCinVerso:'Verso · JPG, PNG ou PDF · max 10MB',
+  ecinPhoto:'Veuillez joindre une photo.',
   p2t:'Coordonnées<br><em>de contact</em>',p2s:'',
   lTel:'Téléphone',lEmail:'Email',
   phTel:'+212 6 00 00 00 00',phEmail:'exemple@email.com',
@@ -506,7 +580,7 @@ fr:{
   p4t:'Conditions &amp;<br><em>règlement intérieur</em>',p4s:'Veuillez lire et accepter avant de valider.',
   check:'J\'ai lu et j\'accepte les <strong>Conditions Générales</strong> et le <strong>Règlement Intérieur</strong>.',
   agreeErr:'Veuillez accepter les conditions pour continuer.',
-  next:'Continuer →',prev:'←',submit:"Valider l'enregistrement",sending:'Envoi…',
+  next:'Continuer →',prev:'←',submit:"Valider l'enregistrement",sending:'Envoi…',uploading:'Upload photos…',
   stitle:'Enregistrement<br><em>confirmé</em>',
   smsg:'Votre formulaire a bien été reçu. Le propriétaire a été notifié.',
   terms:`<h4>Objet</h4><p>Le Propriétaire loue au Locataire l'appartement situé à la Résidence Costa 3, Bâtiment 7, Appartement 18 – Bouznika, pour une durée fixe correspondant aux dates de réservation confirmées.</p><h4>Utilisation du bien</h4><p>Le Locataire s'engage à utiliser les lieux de manière responsable et à se conformer au règlement de copropriété en vigueur.</p><h4>État des lieux</h4><p>Un état des lieux de sortie sera effectué au départ. Tout dommage constaté sera de la responsabilité du Locataire.</p><hr><h4>Règlement intérieur</h4><ul><li>Respecter les espaces communs</li><li>Bruits modérés après minuit</li><li>Interdiction de fumer à l'intérieur — balcon uniquement</li><li>Pas d'organisation de fêtes</li><li>Pas de voyageurs supplémentaires non déclarés</li><li>Respecter les règles de sécurité de la résidence</li><li>Poubelles aux points de collecte hors résidence</li></ul>`
@@ -524,6 +598,10 @@ en:{
   enom:'Please enter your full name.',ecinShort:'Minimum 5 characters.',ecinInvalid:'Invalid format.',
   edob:'Please enter your date of birth.',edob18:'You must be at least 18 years old.',
   eadresse:'Please enter your address.',
+  lCinRecto:'ID / Passport — Front',lCinVerso:'ID / Passport — Back',
+  ulCinRecto:'Click to upload',ulCinVerso:'Click to upload',
+  uhCinRecto:'Front · JPG, PNG or PDF · max 10MB',uhCinVerso:'Back · JPG, PNG or PDF · max 10MB',
+  ecinPhoto:'Please attach a photo.',
   p2t:'Contact<br><em>details</em>',p2s:'',
   lTel:'Phone number',lEmail:'Email',
   phTel:'+212 6 00 00 00 00',phEmail:'example@email.com',
@@ -535,7 +613,7 @@ en:{
   p4t:'Terms &amp;<br><em>house rules</em>',p4s:'Please read and accept before submitting.',
   check:'I have read and agree to the <strong>Terms & Conditions</strong> and <strong>House Rules</strong>.',
   agreeErr:'Please accept the terms to continue.',
-  next:'Continue →',prev:'←',submit:'Submit check-in',sending:'Sending…',
+  next:'Continue →',prev:'←',submit:'Submit check-in',sending:'Sending…',uploading:'Uploading photos…',
   stitle:'Check-in<br><em>confirmed</em>',
   smsg:'Your form has been received. The host has been notified.',
   terms:`<h4>Purpose</h4><p>The Owner rents to the Tenant the apartment at Residence Costa 3, Building 7, Apt 18 – Bouznika, for the confirmed booking dates.</p><h4>Use of property</h4><p>The Tenant agrees to use the property responsibly and comply with the condominium rules in force.</p><h4>Inspection</h4><p>A check-out inspection will be conducted upon departure. Any damage observed will be the Tenant's responsibility.</p><hr><h4>House rules</h4><ul><li>Respect common areas</li><li>Moderate noise after midnight</li><li>No smoking indoors — balcony only</li><li>No parties or gatherings</li><li>No unregistered additional guests</li><li>Comply with residence safety rules</li><li>Rubbish at collection points outside</li></ul>`
@@ -553,6 +631,10 @@ ar:{
   enom:'يرجى إدخال الاسم الكامل.',ecinShort:'5 أحرف على الأقل.',ecinInvalid:'صيغة غير صالحة.',
   edob:'يرجى إدخال تاريخ الميلاد.',edob18:'يجب أن يكون عمرك 18 سنة على الأقل.',
   eadresse:'يرجى إدخال عنوانك.',
+  lCinRecto:'البطاقة / جواز السفر — الوجه الأمامي',lCinVerso:'البطاقة / جواز السفر — الوجه الخلفي',
+  ulCinRecto:'انقر للإضافة',ulCinVerso:'انقر للإضافة',
+  uhCinRecto:'الوجه الأمامي · JPG أو PNG أو PDF · 10MB كحد أقصى',uhCinVerso:'الوجه الخلفي · JPG أو PNG أو PDF · 10MB كحد أقصى',
+  ecinPhoto:'يرجى إرفاق صورة.',
   p2t:'معلومات<br><em>التواصل</em>',p2s:'',
   lTel:'رقم الهاتف',lEmail:'البريد الإلكتروني',
   phTel:'+212 6 00 00 00 00',phEmail:'exemple@email.com',
@@ -564,7 +646,7 @@ ar:{
   p4t:'الشروط<br><em>والأحكام</em>',p4s:'يرجى القراءة والقبول قبل الإرسال.',
   check:'لقد قرأت وأوافق على <strong>الشروط العامة</strong> و<strong>النظام الداخلي</strong>.',
   agreeErr:'يرجى قبول الشروط للمتابعة.',
-  next:'متابعة →',prev:'→',submit:'تأكيد التسجيل',sending:'جارٍ الإرسال…',
+  next:'متابعة →',prev:'→',submit:'تأكيد التسجيل',sending:'جارٍ الإرسال…',uploading:'جارٍ رفع الصور…',
   stitle:'تم التسجيل<br><em>بنجاح</em>',
   smsg:'تم استلام نموذجك. تم إخطار المالك وسيتصل بك إذا لزم الأمر.',
   terms:`<h4>الغرض</h4><p>يقوم المالك بتأجير الشقة الواقعة في مجمع كوستا 3، المبنى 7، الشقة 18 – بوزنيقة، للمستأجر لمدة محددة تتوافق مع تواريخ الحجز المؤكد.</p><h4>استخدام العقار</h4><p>يلتزم المستأجر باستخدام المسكن بمسؤولية والامتثال لنظام الملكية المشتركة.</p><h4>جرد الممتلكات</h4><p>سيتم إجراء جرد عند المغادرة. المستأجر مسؤول عن أي أضرار يتم رصدها.</p><hr><h4>النظام الداخلي</h4><ul><li>احترام المساحات المشتركة</li><li>تخفيف الضوضاء بعد منتصف الليل</li><li>ممنوع التدخين داخل الشقة — الشرفة فقط</li><li>ممنوع إقامة الحفلات</li><li>لا ضيوف غير مسجلين</li><li>الالتزام بقواعد السلامة في المجمع</li><li>وضع القمامة في أماكن التجميع خارج المجمع</li></ul>`
@@ -615,6 +697,10 @@ function validate(id){
     const cleaned=v.replace(/[\s\-·]/g,'').toUpperCase();
     if(!v) msg=t.eplaque;
     else if(!/^[0-9]{3,6}[A-Z]{1,2}[0-9]{1,2}$/.test(cleaned)&&!/^[A-Z0-9]{4,12}$/.test(cleaned)) msg=t.eplaque;
+  }
+  else if(id==='cin-recto'){
+    const input=document.getElementById('cin-recto');
+    if(!input||!input.files||!input.files[0]) msg=t.ecinPhoto;
   }
 
   if(errEl){
@@ -719,7 +805,18 @@ function applyLang(l){
   document.getElementById('s-title').innerHTML=t.stitle;
   document.getElementById('s-msg').textContent=t.smsg;
 
+  /* upload labels */
+  document.getElementById('l-cin-recto').textContent = t.lCinRecto;
+  document.getElementById('l-cin-verso').textContent = t.lCinVerso;
+  document.getElementById('ul-cin-recto').textContent = t.ulCinRecto;
+  document.getElementById('ul-cin-verso').textContent = t.ulCinVerso;
+  document.getElementById('uh-cin-recto').textContent = t.uhCinRecto;
+  document.getElementById('uh-cin-verso').textContent = t.uhCinVerso;
+
   /* reset error messages to new lang */
+  removeFile('cin-recto');
+  removeFile('cin-verso');
+  uploadedUrls.recto=''; uploadedUrls.verso='';
   ['nom','cin','dob','adresse','tel','email','plaque'].forEach(id=>{
     const e=document.getElementById('e-'+id);
     if(e){e.textContent='';e.classList.remove('show');}
@@ -753,6 +850,79 @@ function resetLang(){
 }
 
 /* ── CREDENTIALS ── */
+const CLOUDINARY_CLOUD  = 'di3ylyaic';
+const CLOUDINARY_PRESET = 'costa_checkin';
+const uploadedUrls = { recto: '', verso: '' };
+
+/* ── FILE UPLOAD HELPERS ── */
+function handleFileSelect(input, id) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const area     = document.getElementById('ua-' + id);
+  const preview  = document.getElementById('up-' + id);
+  const previewImg = document.getElementById('uimg-' + id);
+  const previewName = document.getElementById('uname-' + id);
+
+  area.classList.add('has-file');
+  previewName.textContent = file.name;
+
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => { previewImg.src = e.target.result; previewImg.style.display = 'block'; };
+    reader.readAsDataURL(file);
+  } else {
+    previewImg.style.display = 'none';
+  }
+  preview.classList.add('show');
+
+  const errEl = document.getElementById('e-' + id);
+  if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
+}
+
+function removeFile(id) {
+  document.getElementById(id).value = '';
+  document.getElementById('ua-' + id).classList.remove('has-file');
+  document.getElementById('up-' + id).classList.remove('show');
+  document.getElementById('uimg-' + id).src = '';
+  const key = id === 'cin-recto' ? 'recto' : 'verso';
+  uploadedUrls[key] = '';
+}
+
+async function uploadToCloudinary(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input.files[0]) return '';
+
+  const key      = inputId === 'cin-recto' ? 'recto' : 'verso';
+  const progWrap = document.getElementById('uprog-' + inputId);
+  const progBar  = document.getElementById('ubar-'  + inputId);
+  progWrap.classList.add('show');
+  progBar.style.width = '20%';
+
+  const formData = new FormData();
+  formData.append('file',          input.files[0]);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('folder',        'costa-checkin');
+
+  try {
+    progBar.style.width = '50%';
+    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    progBar.style.width = '100%';
+    setTimeout(() => progWrap.classList.remove('show'), 800);
+    uploadedUrls[key] = data.secure_url || '';
+    return data.secure_url || '';
+  } catch(err) {
+    progWrap.classList.remove('show');
+    console.warn('Cloudinary upload error:', err);
+    return '';
+  }
+}
+
+/* ── CREDENTIALS ── */
 const EMAILJS_SERVICE  = 'service_nsp6h6i';
 const EMAILJS_TEMPLATE = 'template_g4n5uea';
 const EMAILJS_KEY      = '-w0ra3oUET5vEg7fN';
@@ -776,32 +946,45 @@ document.getElementById('form').addEventListener('submit', async function(e){
   btn.classList.add('loading');
   btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;stroke:currentColor;fill:none;stroke-width:2;width:17px;height:17px;stroke-linecap:round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${t.sending}`;
 
+  /* ── upload photos to Cloudinary ── */
+  btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;stroke:currentColor;fill:none;stroke-width:2;width:17px;height:17px;stroke-linecap:round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${t.uploading||'Upload…'}`;
+  const [urlRecto, urlVerso] = await Promise.all([
+    uploadToCloudinary('cin-recto'),
+    uploadToCloudinary('cin-verso')
+  ]);
+
+  btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;stroke:currentColor;fill:none;stroke-width:2;width:17px;height:17px;stroke-linecap:round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${t.sending}`;
+
   /* ── collect data ── */
   const payload = {
-    langue  : lang.toUpperCase(),
-    nom     : document.getElementById('nom').value.trim(),
-    cin     : document.getElementById('cin').value.trim(),
-    dob     : document.getElementById('dob').value,
-    adresse : document.getElementById('adresse').value.trim(),
-    tel     : document.getElementById('tel').value.trim(),
-    email   : document.getElementById('email').value.trim(),
-    plaque  : document.getElementById('plaque').value.trim().toUpperCase(),
-    date    : new Date().toLocaleString('fr-FR')
+    langue     : lang.toUpperCase(),
+    nom        : document.getElementById('nom').value.trim(),
+    cin        : document.getElementById('cin').value.trim(),
+    dob        : document.getElementById('dob').value,
+    adresse    : document.getElementById('adresse').value.trim(),
+    tel        : document.getElementById('tel').value.trim(),
+    email      : document.getElementById('email').value.trim(),
+    plaque     : document.getElementById('plaque').value.trim().toUpperCase(),
+    date       : new Date().toLocaleString('fr-FR'),
+    cin_recto  : urlRecto,
+    cin_verso  : urlVerso
   };
 
   try {
     /* ── 1. Google Sheets — script tag trick (bypasses CORS fully) ── */
     await new Promise((resolve) => {
       const params = new URLSearchParams({
-        date    : payload.date,
-        langue  : payload.langue,
-        nom     : payload.nom,
-        cin     : payload.cin,
-        dob     : payload.dob,
-        adresse : payload.adresse,
-        tel     : payload.tel,
-        email   : payload.email,
-        plaque  : payload.plaque
+        date      : payload.date,
+        langue    : payload.langue,
+        nom       : payload.nom,
+        cin       : payload.cin,
+        dob       : payload.dob,
+        adresse   : payload.adresse,
+        tel       : payload.tel,
+        email     : payload.email,
+        plaque    : payload.plaque,
+        cin_recto : payload.cin_recto,
+        cin_verso : payload.cin_verso
       }).toString();
 
       const cbName = 'gsCallback_' + Date.now();
