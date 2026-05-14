@@ -790,12 +790,28 @@ document.getElementById('form').addEventListener('submit', async function(e){
   };
 
   try {
-    /* ── 1. Google Sheets ── */
-    await fetch(SHEETS_URL, {
-      method : 'POST',
-      mode   : 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify(payload)
+    /* ── 1. Google Sheets — script tag trick (bypasses CORS fully) ── */
+    await new Promise((resolve) => {
+      const params = new URLSearchParams({
+        date    : payload.date,
+        langue  : payload.langue,
+        nom     : payload.nom,
+        cin     : payload.cin,
+        dob     : payload.dob,
+        adresse : payload.adresse,
+        tel     : payload.tel,
+        email   : payload.email,
+        plaque  : payload.plaque
+      }).toString();
+
+      const cbName = 'gsCallback_' + Date.now();
+      window[cbName] = function(){ resolve(); delete window[cbName]; };
+
+      const script = document.createElement('script');
+      script.src = SHEETS_URL + '?' + params + '&callback=' + cbName;
+      script.onerror = () => { resolve(); };
+      document.body.appendChild(script);
+      setTimeout(() => { resolve(); if(script.parentNode) script.parentNode.removeChild(script); }, 5000);
     });
 
     /* ── 2. EmailJS ── */
@@ -818,6 +834,7 @@ document.getElementById('form').addEventListener('submit', async function(e){
   document.querySelector('.form-section').scrollIntoView({behavior:'smooth', block:'start'});
 });
 </script>
+<iframe name="hidden_iframe" style="display:none"></iframe>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </body>
 </html>
