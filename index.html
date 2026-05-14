@@ -752,29 +752,72 @@ function resetLang(){
   document.body.className='';
 }
 
-document.getElementById('form').addEventListener('submit',function(e){
+/* ── CREDENTIALS ── */
+const EMAILJS_SERVICE  = 'service_nsp6h6i';
+const EMAILJS_TEMPLATE = 'template_g4n5uea';
+const EMAILJS_KEY      = '-w0ra3oUET5vEg7fN';
+const SHEETS_URL       = 'https://script.google.com/macros/s/AKfycbzrv_pf3RMUPqQ1Q-Uj0zfZcEws7AD-9Gb_Nr1TZDmhBnqe_jxfUCFdDNcQe5BtVIbiGg/exec';
+
+document.getElementById('form').addEventListener('submit', async function(e){
   e.preventDefault();
-  const t=T[lang];
+  const t = T[lang];
+
   /* re-validate all steps */
-  let allOk=true;
-  [0,1,2].forEach(step=>fieldMap[step].forEach(id=>{if(!validate(id))allOk=false}));
+  let allOk = true;
+  [0,1,2].forEach(step => fieldMap[step].forEach(id => { if(!validate(id)) allOk = false; }));
   if(!allOk) return;
 
-  const agreeEl=document.getElementById('agree');
-  const agreeErr=document.getElementById('agree-err');
-  if(!agreeEl.checked){agreeErr.classList.add('show');return;}
+  const agreeEl  = document.getElementById('agree');
+  const agreeErr = document.getElementById('agree-err');
+  if(!agreeEl.checked){ agreeErr.classList.add('show'); return; }
   agreeErr.classList.remove('show');
 
-  const btn=document.getElementById('submitBtn');
+  const btn = document.getElementById('submitBtn');
   btn.classList.add('loading');
-  btn.innerHTML=`<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;stroke:currentColor;fill:none;stroke-width:2;width:17px;height:17px;stroke-linecap:round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${t.sending}`;
-  setTimeout(()=>{
-    document.getElementById('form').style.display='none';
-    document.querySelector('.steps-nav').style.display='none';
-    document.getElementById('successPanel').classList.add('show');
-    document.querySelector('.form-section').scrollIntoView({behavior:'smooth',block:'start'});
-  },1800);
+  btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite;stroke:currentColor;fill:none;stroke-width:2;width:17px;height:17px;stroke-linecap:round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${t.sending}`;
+
+  /* ── collect data ── */
+  const payload = {
+    langue  : lang.toUpperCase(),
+    nom     : document.getElementById('nom').value.trim(),
+    cin     : document.getElementById('cin').value.trim(),
+    dob     : document.getElementById('dob').value,
+    adresse : document.getElementById('adresse').value.trim(),
+    tel     : document.getElementById('tel').value.trim(),
+    email   : document.getElementById('email').value.trim(),
+    plaque  : document.getElementById('plaque').value.trim().toUpperCase(),
+    date    : new Date().toLocaleString('fr-FR')
+  };
+
+  try {
+    /* ── 1. Google Sheets ── */
+    await fetch(SHEETS_URL, {
+      method : 'POST',
+      mode   : 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(payload)
+    });
+
+    /* ── 2. EmailJS ── */
+    await emailjs.send(
+      EMAILJS_SERVICE,
+      EMAILJS_TEMPLATE,
+      payload,
+      EMAILJS_KEY
+    );
+
+  } catch(err) {
+    console.warn('Submission warning:', err);
+    /* On continue même si une des deux échoue */
+  }
+
+  /* ── success screen ── */
+  document.getElementById('form').style.display        = 'none';
+  document.querySelector('.steps-nav').style.display   = 'none';
+  document.getElementById('successPanel').classList.add('show');
+  document.querySelector('.form-section').scrollIntoView({behavior:'smooth', block:'start'});
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </body>
 </html>
